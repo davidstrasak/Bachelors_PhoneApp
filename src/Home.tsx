@@ -1,7 +1,3 @@
-"use client";
-
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import {
   PlusCircle,
@@ -10,10 +6,6 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
 interface ConveyorControl {
   id: string;
@@ -25,6 +17,10 @@ export default function Home() {
   const [conveyors, setConveyors] = useState<ConveyorControl[]>([]);
   const [newIp, setNewIp] = useState("");
   const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    console.log(conveyors);
+  }, [conveyors]);
 
   useEffect(() => {
     const savedConveyors = localStorage.getItem("conveyors");
@@ -72,76 +68,92 @@ export default function Home() {
     <main className="container mx-auto p-4 max-w-md">
       <form onSubmit={addConveyor} className="mb-8 space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="ip">IP Address</Label>
-          <Input
+          <label htmlFor="ip">IP Address</label>
+          <input
             id="ip"
             type="text"
-            placeholder="192.168.0.207"
+            placeholder="192.168.X.YYY"
             value={newIp}
             onChange={(e) => setNewIp(e.target.value)}
-            className="w-full"
+            className="w-full input input-primary"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="name">Name (Optional)</Label>
-          <Input
+          <label htmlFor="name">Name (Optional)</label>
+          <input
             id="name"
             type="text"
-            placeholder="Main Conveyor"
+            placeholder="Which one is it?"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className="w-full"
+            className="w-full input input-primary"
           />
         </div>
-        <Button type="submit" className="w-full">
+        <button type="submit" className="w-full btn btn-primary">
           <PlusCircle className="w-4 h-4 mr-2" />
           Add Conveyor
-        </Button>
+        </button>
       </form>
 
       <div className="space-y-4">
         {conveyors.map((conveyor) => (
-          <Card key={conveyor.id} className="bg-card">
-            <CardContent className="pt-6">
+          <div
+            key={conveyor.id}
+            className="border-2 rounded-lg p-4 border-base-content"
+          >
+            <div className="">
               <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="font-semibold">{conveyor.name}</h3>
+                  <input
+                    type="text"
+                    className="font-semibold border-0"
+                    value={conveyor.name ? conveyor.name : "unnamed"}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      setConveyors(
+                        conveyors.map((conv) =>
+                          conv.id === conveyor.id
+                            ? { ...conv, name: e.target.value }
+                            : conv
+                        )
+                      );
+                    }}
+                  />
+
                   <p className="text-sm text-muted-foreground">{conveyor.ip}</p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive"
+                <button
+                  className="btn btn-error btn-ghost"
                   onClick={() => removeConveyor(conveyor.id)}
                 >
                   <Trash2 className="w-4 h-4" />
-                </Button>
+                </button>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <Button
-                  className="w-full"
+                <button
+                  className="w-full btn bg-base-content text-base-300"
                   onClick={() => sendCommand(conveyor.ip, "conveyorOn")}
                 >
                   <Power className="w-4 h-4 mr-2" />
                   ON
-                </Button>
-                <Button
-                  className="w-full"
+                </button>
+                <button
+                  className="w-full btn bg-base-content text-base-300"
                   onClick={() => sendCommand(conveyor.ip, "speedUp")}
                 >
                   <ChevronUp className="w-4 h-4 mr-2" />
                   Speed +
-                </Button>
-                <Button
-                  className="w-full"
+                </button>
+                <button
+                  className="w-full btn bg-base-content text-base-300"
                   onClick={() => sendCommand(conveyor.ip, "speedDown")}
                 >
                   <ChevronDown className="w-4 h-4 mr-2" />
                   Speed -
-                </Button>
+                </button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </main>
