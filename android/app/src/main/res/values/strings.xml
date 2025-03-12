@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Conveyor control</string>
+    <string name="title_activity_main">Conveyor control</string>
+    <string name="package_name">net.davidstrasak.app</string>
+    <string name="custom_url_scheme">net.davidstrasak.app</string>
+</resources>

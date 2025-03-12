@@ -11,6 +11,9 @@ interface ConveyorControl {
   id: string;
   ip: string;
   name: string;
+  isConveyorOn: boolean;
+  isSpeedUpOn: boolean;
+  isSpeedDownOn: boolean;
 }
 
 export default function Home() {
@@ -42,6 +45,9 @@ export default function Home() {
           id: Date.now().toString(),
           ip: newIp,
           name: newName || `Conveyor ${conveyors.length + 1}`,
+          isConveyorOn: false,
+          isSpeedUpOn: false,
+          isSpeedDownOn: false,
         },
       ]);
       setNewIp("");
@@ -59,9 +65,32 @@ export default function Home() {
       if (!response.ok) throw new Error("Failed to send command");
       // Add visual feedback here if needed
     } catch (error) {
-      console.error("Error sending command:", error);
-      // Add error handling UI here if needed
+      console.log(error);
     }
+  };
+
+  const toggleConveyor = (id: string) => {
+    setConveyors(
+      conveyors.map((conv) =>
+        conv.id === id ? { ...conv, isConveyorOn: !conv.isConveyorOn } : conv
+      )
+    );
+  };
+
+  const toggleSpeedUp = (id: string) => {
+    setConveyors(
+      conveyors.map((conv) =>
+        conv.id === id ? { ...conv, isSpeedUpOn: !conv.isSpeedUpOn } : conv
+      )
+    );
+  };
+
+  const toggleSpeedDown = (id: string) => {
+    setConveyors(
+      conveyors.map((conv) =>
+        conv.id === id ? { ...conv, isSpeedDownOn: !conv.isSpeedDownOn } : conv
+      )
+    );
   };
 
   return (
@@ -103,7 +132,7 @@ export default function Home() {
           >
             <div className="">
               <div className="flex justify-between items-center mb-4">
-                <div>
+                <div className="grid grid-cols-2 grid-rows-2">
                   <input
                     type="text"
                     className="font-semibold border-0"
@@ -121,6 +150,11 @@ export default function Home() {
                   />
 
                   <p className="text-sm text-muted-foreground">{conveyor.ip}</p>
+
+                  <p className="text-sm text-muted-foreground">Speed: 50%</p>
+                  <p className="text-sm text-muted-foreground">
+                    Remote Controlled
+                  </p>
                 </div>
                 <button
                   className="btn btn-error btn-ghost"
@@ -131,25 +165,53 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <button
-                  className="w-full btn bg-base-content text-base-300"
-                  onClick={() => sendCommand(conveyor.ip, "conveyorOn")}
+                  className={`w-full btn ${
+                    conveyor.isConveyorOn ? "btn-success" : "btn-error"
+                  }`}
+                  onClick={() => {
+                    sendCommand(
+                      conveyor.ip,
+                      conveyor.isConveyorOn ? "conveyorOff" : "conveyorOn"
+                    );
+                    toggleConveyor(conveyor.id);
+                  }}
                 >
                   <Power className="w-4 h-4 mr-2" />
-                  ON
+                  {conveyor.isConveyorOn ? "ON" : "OFF"}
                 </button>
                 <button
-                  className="w-full btn bg-base-content text-base-300"
-                  onClick={() => sendCommand(conveyor.ip, "speedUp")}
+                  className={`w-full btn ${
+                    conveyor.isSpeedUpOn
+                      ? "btn-success"
+                      : "bg-base-content text-base-100"
+                  }`}
+                  onClick={() => {
+                    sendCommand(
+                      conveyor.ip,
+                      conveyor.isSpeedUpOn ? "incSpeedOff" : "incSpeedOn"
+                    );
+                    toggleSpeedUp(conveyor.id);
+                  }}
                 >
                   <ChevronUp className="w-4 h-4 mr-2" />
-                  Speed +
+                  {conveyor.isSpeedUpOn ? "Speed +" : "Speed +"}
                 </button>
                 <button
-                  className="w-full btn bg-base-content text-base-300"
-                  onClick={() => sendCommand(conveyor.ip, "speedDown")}
+                  className={`w-full btn ${
+                    conveyor.isSpeedDownOn
+                      ? "btn-success"
+                      : "bg-base-content text-base-100"
+                  }`}
+                  onClick={() => {
+                    sendCommand(
+                      conveyor.ip,
+                      conveyor.isSpeedDownOn ? "decSpeedOff" : "decSpeedOn"
+                    );
+                    toggleSpeedDown(conveyor.id);
+                  }}
                 >
                   <ChevronDown className="w-4 h-4 mr-2" />
-                  Speed -
+                  {conveyor.isSpeedDownOn ? "Speed -" : "Speed -"}
                 </button>
               </div>
             </div>
