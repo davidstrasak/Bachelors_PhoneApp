@@ -69,6 +69,12 @@ export default function Home() {
         );
       }
       setErrorMessage(null); // Clear any previous error message
+      console.log(response);
+      try {
+        // Try catch block here to catch the errors in JSON parsing (since when testing the app is responding with HTML)
+        const responseData = await response.json();
+        console.log("Response data:", responseData);
+      } catch (error: any) {}
     } catch (error: any) {
       console.error("Command failed:", error);
       setErrorMessage(`Command failed for ${ip}: ${error.message}`);
@@ -103,11 +109,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/todos/1"
-        );
-        const data = await response.json();
-        console.log(data);
+        await sendCommand("jsonplaceholder.typicode.com", "todos/1");
       } catch (error) {
         console.error("Error fetching data:", error);
       }
