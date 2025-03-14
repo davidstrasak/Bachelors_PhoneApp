@@ -6,6 +6,9 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
+import { Network } from "@capacitor/network";
+import { CapacitorHttp } from "@capacitor/core";
+import { HttpOptions } from "@capacitor/core/types/core-plugins";
 
 interface ConveyorControl {
   id: string;
@@ -17,6 +20,17 @@ interface ConveyorControl {
 }
 
 export default function Home() {
+  const [networkStatus, setNetworkStatus] = useState<string>("");
+
+  useEffect(() => {
+    async function getTheNetworkStatus() {
+      const status = await Network.getStatus();
+      setNetworkStatus(JSON.stringify(status));
+    }
+
+    getTheNetworkStatus();
+  }, []);
+
   const [conveyors, setConveyors] = useState<ConveyorControl[]>([]);
   const [newIp, setNewIp] = useState("");
   const [newName, setNewName] = useState("");
@@ -62,12 +76,16 @@ export default function Home() {
 
   const sendCommand = async (ip: string, command: string) => {
     try {
-      const response = await fetch(`http://${ip}/${command}`);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to send command to ${ip}: ${response.status} ${response.statusText}`
-        );
-      }
+      const options: HttpOptions = {
+        url: `http://${ip}/${command}`,
+      };
+      const response: any = await CapacitorHttp.get(options);
+      // const response = await fetch(`http://${ip}/${command}`);
+      // if (!response.ok) {
+      //   throw new Error(
+      //     `Failed to send command to ${ip}: ${response.status} ${response.statusText}`
+      //   );
+      // }
       setErrorMessage(null); // Clear any previous error message
       console.log(response);
       try {
@@ -120,6 +138,7 @@ export default function Home() {
 
   return (
     <main className="container mx-auto p-4 max-w-md mt-20">
+      <p>{networkStatus}</p>
       {errorMessage && (
         <div className="alert alert-error">
           <svg
@@ -166,7 +185,6 @@ export default function Home() {
           Add Conveyor
         </button>
       </form>
-
       <div className="space-y-4">
         {conveyors.map((conveyor) => (
           <div
