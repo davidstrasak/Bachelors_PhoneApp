@@ -20,6 +20,7 @@ export default function Home() {
   const [conveyors, setConveyors] = useState<ConveyorControl[]>([]);
   const [newIp, setNewIp] = useState("");
   const [newName, setNewName] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     console.log(conveyors);
@@ -62,10 +63,15 @@ export default function Home() {
   const sendCommand = async (ip: string, command: string) => {
     try {
       const response = await fetch(`http://${ip}/${command}`);
-      if (!response.ok) throw new Error("Failed to send command");
-      // Add visual feedback here if needed
-    } catch (error) {
-      console.log(error);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to send command to ${ip}: ${response.status} ${response.statusText}`
+        );
+      }
+      setErrorMessage(null); // Clear any previous error message
+    } catch (error: any) {
+      console.error("Command failed:", error);
+      setErrorMessage(`Command failed for ${ip}: ${error.message}`);
     }
   };
 
@@ -93,8 +99,43 @@ export default function Home() {
     );
   };
 
+  // this code is here to test if the fetch function works
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/todos/1"
+        );
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <main className="container mx-auto p-4 max-w-md">
+      {errorMessage && (
+        <div className="alert alert-error">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{errorMessage}</span>
+        </div>
+      )}
       <form onSubmit={addConveyor} className="mb-8 space-y-4">
         <div className="space-y-2">
           <label htmlFor="ip">IP Address</label>
