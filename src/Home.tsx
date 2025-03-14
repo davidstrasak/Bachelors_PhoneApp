@@ -117,7 +117,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="container mx-auto p-4 max-w-md">
+    <main className="container mx-auto p-4 max-w-md mt-20">
       {errorMessage && (
         <div className="alert alert-error">
           <svg
