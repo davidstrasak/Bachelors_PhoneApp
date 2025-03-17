@@ -15,8 +15,9 @@ export default function Help() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Network Status</h2>
+      <p>You are:</p>
       {networkStatus && (
-        <div className="space-y-3">
+        <div className="">
           <div className="flex items-center">
             <div
               className={`w-3 h-3 rounded-full mr-2 ${

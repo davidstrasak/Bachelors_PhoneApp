@@ -1,5 +1,5 @@
 import Header from "./Header.tsx";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [headerHeight, setHeaderHeight] = useState(0);

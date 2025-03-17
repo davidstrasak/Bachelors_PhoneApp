@@ -23,7 +23,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-base-300 backdrop-blur-sm shadow-sm pt-[30px]">
+    <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-base-300 backdrop-blur-sm shadow-sm pt-[20px]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -49,7 +49,7 @@ export default function Header() {
                       className={`text-sm font-medium transition-colors duration-300 ${
                         isActive
                           ? "text-primary border-b-2 border-primary py-1"
-                          : "text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary"
+                          : "text-base-content hover:text-primary"
                       }`}
                       aria-current={isActive ? "page" : undefined}
                     >
@@ -63,7 +63,7 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden rounded-md p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+            className="md:hidden rounded-md p-2 text-base-content hover:bg-base-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
             onClick={toggleMenu}
             aria-expanded={isMenuOpen}
             aria-label="Toggle menu"
@@ -85,7 +85,7 @@ export default function Header() {
             : "opacity-0 -translate-y-4 h-0 overflow-hidden"
         }`}
       >
-        <div className="px-4 pb-4 pt-2 space-y-1 bg-white dark:bg-gray-900 shadow-lg">
+        <div className="px-4 pb-4 pt-2 space-y-1 bg-base-100 shadow-lg">
           {navigationLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -95,7 +95,7 @@ export default function Header() {
                 className={`block py-3 px-4 text-base font-medium rounded-md transition-colors duration-200 ${
                   isActive
                     ? "bg-primary/10 text-primary"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    : "text-base-content hover:bg-base-100"
                 }`}
                 aria-current={isActive ? "page" : undefined}
               >
