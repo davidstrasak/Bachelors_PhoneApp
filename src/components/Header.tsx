@@ -4,23 +4,8 @@ import { Menu, X } from "lucide-react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const pathname = location.pathname;
-
-  // Handle scroll effect for header background
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Close menu when route changes
   useEffect(() => {
@@ -38,20 +23,14 @@ export default function Header() {
   ];
 
   return (
-    <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm"
-          : "bg-transparent"
-      }`}
-    >
+    <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-base-300 backdrop-blur-sm shadow-sm pt-[30px]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link
               to="/"
-              className="text-xl font-bold text-gray-900 dark:text-white"
+              className="text-xl font-bold text-primary"
               aria-label="Home page"
             >
               Conveyor Controller
