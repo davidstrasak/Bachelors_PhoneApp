@@ -23,7 +23,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-base-300 backdrop-blur-sm shadow-sm pt-[20px]">
+    <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-base-300 backdrop-blur-sm shadow-sm pt-[30px]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
