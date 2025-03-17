@@ -16,9 +16,11 @@
     "@capacitor/ios": "^7.0.1",
     "@capacitor/network": "^7.0.0",
     "@tailwindcss/vite": "^4.0.8",
+    "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.476.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.3.0",
     "tailwindcss": "^4.0.8"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { Network } from "@capacitor/network";
+
 import { CapacitorHttp } from "@capacitor/core";
 import { HttpOptions } from "@capacitor/core/types/core-plugins";
 
@@ -20,18 +20,48 @@ interface ConveyorControl {
 }
 
 export default function Home() {
-  const [networkStatus, setNetworkStatus] = useState<string>("");
-
-  useEffect(() => {
-    async function getTheNetworkStatus() {
-      const status = await Network.getStatus();
-      setNetworkStatus(JSON.stringify(status));
-    }
-
-    getTheNetworkStatus();
-  }, []);
-
-  const [conveyors, setConveyors] = useState<ConveyorControl[]>([]);
+  const [conveyors, setConveyors] = useState<ConveyorControl[]>([
+    {
+      id: "1",
+      ip: "192.168.1.101",
+      name: "Main Line Conveyor",
+      isConveyorOn: false,
+      isSpeedUpOn: false,
+      isSpeedDownOn: false,
+    },
+    {
+      id: "2",
+      ip: "192.168.1.102",
+      name: "Packaging Line",
+      isConveyorOn: false,
+      isSpeedUpOn: false,
+      isSpeedDownOn: false,
+    },
+    {
+      id: "3",
+      ip: "192.168.1.103",
+      name: "Assembly Line",
+      isConveyorOn: false,
+      isSpeedUpOn: false,
+      isSpeedDownOn: false,
+    },
+    {
+      id: "4",
+      ip: "192.168.1.104",
+      name: "Sorting Line",
+      isConveyorOn: false,
+      isSpeedUpOn: false,
+      isSpeedDownOn: false,
+    },
+    {
+      id: "5",
+      ip: "192.168.1.105",
+      name: "Distribution Line",
+      isConveyorOn: false,
+      isSpeedUpOn: false,
+      isSpeedDownOn: false,
+    },
+  ]);
   const [newIp, setNewIp] = useState("");
   const [newName, setNewName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -137,8 +167,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="container mx-auto p-4 max-w-md mt-20">
-      <p>{networkStatus}</p>
+    <>
       {errorMessage && (
         <div className="alert alert-error">
           <svg
@@ -279,6 +308,6 @@ export default function Home() {
           </div>
         ))}
       </div>
-    </main>
+    </>
   );
 }
