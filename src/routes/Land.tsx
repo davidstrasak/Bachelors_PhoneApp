@@ -23,8 +23,8 @@ export default function Home() {
   const [conveyors, setConveyors] = useState<ConveyorControl[]>([
     {
       id: "1",
-      ip: "192.168.1.101",
-      name: "Main Line Conveyor",
+      ip: "192.168.0.187",
+      name: "D1 mini board",
       isConveyorOn: false,
       isSpeedUpOn: false,
       isSpeedDownOn: false,
