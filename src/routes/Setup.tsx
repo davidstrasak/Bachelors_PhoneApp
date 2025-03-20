@@ -68,7 +68,7 @@ export default function Setup() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="container mx-auto px-4 pb-36 max-w-3xl">
       <ScrollToTop />
       <h1 className="text-3xl font-bold text-primary mb-6 border-b-2 border-primary pb-2">
         How to set up the connections and conveyor
