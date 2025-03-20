@@ -1,6 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Setup() {
+  // Add state for carousel
+  const [currentImage, setCurrentImage] = useState(1);
+  const totalImages = 9;
+
+  // Image descriptions for the carousel
+  const imageDescriptions = [
+    "Power on the gameboy and connect it to the VFD control panel. Select the setup option from the main menu and click on the quick setup.",
+    "You want to factory reset the VFD (If you are commissioning then there should be no code uploaded on the VFD, so this is fine).",
+    "Now you can keep all the default settings of the VFD control panel. Go to the bottom of the settings and click the I/O setup.",
+    "In the I/O setup click on the option (9) Standard IO with MOP. This is a setting the conveyor controller is designed to work with.",
+    "Confirm your selection by holding the OK button for 2 seconds.",
+    "You should see this notification.",
+    "Now the control panel should be sending you this fault. It is not relevant though, so just click Acknowledge all.",
+    "After clicking to acknowledge, everything should be okay.",
+    "The VFD is now properly configured for use with the conveyor controller.",
+  ];
+
+  // Function to navigate carousel
+  const navigateCarousel = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setCurrentImage((current) => (current === 1 ? totalImages : current - 1));
+    } else {
+      setCurrentImage((current) => (current === totalImages ? 1 : current + 1));
+    }
+  };
+
   // Add this effect to handle smooth scrolling with header offset
   useEffect(() => {
     // Function to handle anchor clicks
@@ -104,10 +130,19 @@ export default function Setup() {
         up, you can disconnect the gameboy and only use the conveyor controller
         to move the conveyor.
       </p>
-      <img
-        src=""
-        alt="How the proper setup of the VFD with the conveyor controller looks like."
-      />
+      <div className="card bg-base-100 shadow-lg">
+        <figure className="px-6 pt-6">
+          <img
+            src=""
+            alt="How the proper setup of the VFD with the conveyor controller looks like."
+            className="rounded-lg"
+          />
+        </figure>
+        <div className="card-body text-sm italic">
+          How the proper setup of the VFD with the conveyor controller looks
+          like.
+        </div>
+      </div>
       <p className="text-base-content mb-4">
         The conveyor controller can be used locally or remotely. Local mode can
         be used without connecting the device's power cable, but you will be
@@ -117,10 +152,19 @@ export default function Setup() {
         one conveyor using more conveyor controller devices which are connected
         on one network.
       </p>
-      <img
-        src=""
-        alt="Image where you can see what each of the buttons mean on the conveyor controller."
-      />
+      <div className="card bg-base-100 shadow-lg">
+        <figure className="px-6 pt-6">
+          <img
+            src=""
+            alt="Image where you can see what each of the buttons mean on the conveyor controller."
+            className="rounded-lg"
+          />
+        </figure>
+        <div className="card-body text-sm italic">
+          Image showing what each of the buttons mean on the conveyor
+          controller.
+        </div>
+      </div>
 
       <h2
         id="vfd"
@@ -128,6 +172,77 @@ export default function Setup() {
       >
         How to set up the conveyor's VFD
       </h2>
+      <p className="text-base-content mb-4">
+        Follow these steps to set up the VFD using the gameboy controller:
+      </p>
+
+      {/* VFD Setup Image Carousel */}
+      <div className="card bg-base-100 shadow-lg mb-6">
+        <figure className="px-6 pt-6 relative">
+          <img
+            src={`/images/gbsetup${currentImage}.jpg`}
+            alt={`VFD Setup Step ${currentImage}`}
+            className="rounded-lg"
+          />
+          <div className="absolute inset-0 flex items-center justify-between px-4">
+            <button
+              onClick={() => navigateCarousel("prev")}
+              className="bg-base-300 hover:bg-primary text-primary hover:text-white p-2 rounded-full shadow-lg"
+              aria-label="Previous image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => navigateCarousel("next")}
+              className="bg-base-300 hover:bg-primary text-primary hover:text-white p-2 rounded-full shadow-lg"
+              aria-label="Next image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </figure>
+        <div className="card-body text-sm italic">
+          <p>{imageDescriptions[currentImage - 1]}</p>
+          <div className="flex justify-center space-x-1 mt-2">
+            {Array.from({ length: totalImages }).map((_, i) => (
+              <button
+                key={i}
+                className={`h-2 w-2 rounded-full ${
+                  i + 1 === currentImage ? "bg-primary" : "bg-base-300"
+                }`}
+                onClick={() => setCurrentImage(i + 1)}
+                aria-label={`Go to image ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       <h2
         id="connections"
