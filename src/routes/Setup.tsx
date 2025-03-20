@@ -1,9 +1,99 @@
+import { useEffect } from "react";
+
 export default function Setup() {
+  // Add this effect to handle smooth scrolling with header offset
+  useEffect(() => {
+    // Function to handle anchor clicks
+    const handleAnchorClick = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      const target = mouseEvent.target as HTMLElement;
+      if (
+        target.tagName === "A" &&
+        target.getAttribute("href")?.startsWith("#")
+      ) {
+        e.preventDefault();
+
+        const targetId = target.getAttribute("href")!.substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          // Get header height
+          const header = document.querySelector("header");
+          const headerHeight = header
+            ? header.getBoundingClientRect().height
+            : 0;
+
+          // Calculate position
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.pageYOffset - headerHeight - 20;
+
+          // Scroll
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }
+    };
+
+    // Add event listeners to all links
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach((link) => {
+      link.addEventListener("click", handleAnchorClick);
+    });
+
+    // Cleanup
+    return () => {
+      links.forEach((link) => {
+        link.removeEventListener("click", handleAnchorClick);
+      });
+    };
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-3xl font-bold text-primary mb-6 border-b-2 border-primary pb-2">
         How to set up the connections and conveyor
       </h1>
+      <nav className="bg-base-200 p-4 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-bold text-primary mb-4">
+          Table of Contents
+        </h2>
+        <ul className="space-y-2 list-disc pl-5">
+          <li>
+            <a href="#howdoesitwork" className="text-secondary hover:underline">
+              How does this device work
+            </a>
+          </li>
+          <li>
+            <a href="#vfd" className="text-secondary hover:underline">
+              How to set up the conveyor's VFD
+            </a>
+          </li>
+          <li>
+            <a href="#connections" className="text-secondary hover:underline">
+              Where to connect the cables
+            </a>
+          </li>
+          <li>
+            <a href="#wifi" className="text-secondary hover:underline">
+              How to set up the WiFi hotspot
+            </a>
+          </li>
+          <li>
+            <a href="#starting" className="text-secondary hover:underline">
+              Starting the device
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <h2
+        id="howdoesitwork"
+        className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
+      >
+        How does this device work
+      </h2>
       <p className="text-base-content mb-4">
         This page is a guide to help you set up the conveyor controlling device.
         But first some information on how the device works.
@@ -31,34 +121,6 @@ export default function Setup() {
         src=""
         alt="Image where you can see what each of the buttons mean on the conveyor controller."
       />
-
-      <nav className="bg-base-200 p-4 rounded-lg shadow-md mb-8">
-        <h2 className="text-xl font-bold text-primary mb-4">
-          Table of Contents
-        </h2>
-        <ul className="space-y-2 list-disc pl-5">
-          <li>
-            <a href="#vfd" className="text-secondary hover:underline">
-              How to set up the conveyor's VFD
-            </a>
-          </li>
-          <li>
-            <a href="#connections" className="text-secondary hover:underline">
-              Where to connect the cables
-            </a>
-          </li>
-          <li>
-            <a href="#wifi" className="text-secondary hover:underline">
-              How to set up the WiFi hotspot
-            </a>
-          </li>
-          <li>
-            <a href="#starting" className="text-secondary hover:underline">
-              Starting the device
-            </a>
-          </li>
-        </ul>
-      </nav>
 
       <h2
         id="vfd"
