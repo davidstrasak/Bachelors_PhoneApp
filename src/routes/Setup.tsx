@@ -120,7 +120,7 @@ export default function Setup() {
         to move the conveyor.
       </p>
       <StandardImage
-        src=""
+        src="images/properVFDsetup.jpg"
         alt="How the proper setup of the VFD with the conveyor controller looks like."
         caption="How the proper setup of the VFD with the conveyor controller looks like."
       />
@@ -134,10 +134,31 @@ export default function Setup() {
         on one network.
       </p>
       <StandardImage
-        src=""
+        src="images/buttonDescriptions.png"
         alt="Image where you can see what each of the buttons mean on the conveyor controller."
-        caption="Image showing what each of the buttons mean on the conveyor controller."
+        caption="There are four buttons on the conveyor controller. "
       />
+      <p className="text-base-content mb-4">
+        The conveyor controller buttons have the following functions:
+      </p>
+      <ul className="bg-base-100 p-4 rounded-md shadow-sm mb-8 space-y-2">
+        <li className="flex items-center">
+          <span className="text-primary mr-2">Upper Right</span> Switches
+          between local and remote control of the conveyor
+        </li>
+        <li className="flex items-center">
+          <span className="text-primary mr-2">Upper Left</span> Controls the
+          ON/OFF state of the conveyor
+        </li>
+        <li className="flex items-center">
+          <span className="text-primary mr-2">Green Button</span> Increases the
+          speed when pressed
+        </li>
+        <li className="flex items-center">
+          <span className="text-primary mr-2">Red Button</span> Decreases the
+          speed when pressed
+        </li>
+      </ul>
       <h2
         id="vfd"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
@@ -184,7 +205,7 @@ export default function Setup() {
           </svg>
           <span>
             Alert! Before you connect the cables, make sure the VFD power is
-            off! Make sure the high voltage switch is set to "O".
+            off! The high voltage switch should be set to "O".
           </span>
         </div>
       </div>
@@ -208,9 +229,14 @@ export default function Setup() {
         </li>
         <li className="flex items-center">
           <span className="badge badge-primary mr-2">Black</span> The cable with
-          the 9-pin head connects to the slot that has 24V OUT written on it.
+          the 9 pin head will be connected at the last step.
         </li>
       </ul>
+      <StandardImage
+        src="/images/ControlPanelIOSetup.jpg"
+        alt="Control Panel Setup"
+        caption="Yellow cable connected to the input that has DI0 and DI1 written on it and the black cable connected to the input to the right of it."
+      />
       <h2
         id="wifi"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
@@ -245,11 +271,6 @@ export default function Setup() {
         Now make sure that the device has all the buttons in the correct
         positions like in the image here:
       </p>
-      <StandardImage
-        src="/images/ControlPanelIOSetup.jpg"
-        alt="Control Panel Setup"
-        caption="Yellow cable connected to the input that has DI0 and DI1 written on it and the black cable connected to the input to the right of it."
-      />
     </div>
   );
 }
