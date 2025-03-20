@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import StandardImage from "../components/StandardImage";
 import ImageCarousel from "../components/ImageCarousel";
+import ScrollToTop from "../components/ScrollToTop";
 
 export default function Setup() {
   // Image descriptions for the carousel
@@ -68,6 +69,7 @@ export default function Setup() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <ScrollToTop />
       <h1 className="text-3xl font-bold text-primary mb-6 border-b-2 border-primary pb-2">
         How to set up the connections and conveyor
       </h1>
@@ -204,8 +206,8 @@ export default function Setup() {
             />
           </svg>
           <span>
-            Alert! Before you connect the cables, make sure the VFD power is
-            off! The high voltage switch should be set to "O".
+            Before you connect the cables, make sure the VFD power is off! The
+            high voltage switch should be set to "O".
           </span>
         </div>
       </div>
@@ -268,9 +270,64 @@ export default function Setup() {
         Starting the device
       </h2>
       <p className="text-base-content mb-4">
-        Now make sure that the device has all the buttons in the correct
-        positions like in the image here:
+        When you have set up the VFD, connected all the cables and set up the
+        WiFi network, you are ready to start the microcontroller inside the
+        conveyor controller device.
       </p>
+      <div className="alert alert-warning shadow-lg mb-6">
+        <div className="flex space-x-4 items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current flex-shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <span>
+            Before you connect the power cable, make sure all the buttons are in
+            the correct positions like in this image:
+          </span>
+        </div>
+      </div>
+      <StandardImage
+        src="images/correctButtonPositions.jpg"
+        alt="the correct button positions for startup"
+        caption="The buttons need to be in these positions when you connect the power cable. These positions are Local mode, conveyor locally off and none of the buttons are pressed."
+      />
+      <p className="text-base-content mb-4">
+        If the buttons are set up like in the image above, you can connect the
+        black 9 pin cable to the 24V OUT port on the VFD.
+      </p>
+      <p className="text-base-content mb-4">
+        When the cable is connected, the microcontroller will start. On the LCD
+        you should see that it is trying to connect to your WiFi hotspot.
+      </p>
+      <p className="mb-4 text-base-content">
+        When everything looks correct, you can now turn on the power to the
+        conveyor by rotating the high voltage switch 90 degrees clockwise. The
+        switch is in the box with the high voltage sign on it.
+      </p>
+      <p className="mb-4 text-base-content">
+        If you want to control the conveyor remotely then do:
+      </p>
+      <ul className="list-disc pl-5">
+        <li>
+          Switch the remote/local switch to the remote position (90 degrees
+          counter clockwise).
+        </li>{" "}
+        <li>
+          Put the IP address displayed on the LCD into the IP address slot on
+          the Home page of this application{" "}
+        </li>
+        <li>Now you should be able to control the conveyor remotely.</li>
+        <li>If you have any problems, check with the Help page of this app</li>
+      </ul>
     </div>
   );
 }
