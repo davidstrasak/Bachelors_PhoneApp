@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import StandardImage from "../components/StandardImage";
+import ImageCarousel from "../components/ImageCarousel";
 
 export default function Setup() {
-  // Add state for carousel
-  const [currentImage, setCurrentImage] = useState(1);
-  const totalImages = 9;
-
   // Image descriptions for the carousel
   const imageDescriptions = [
     "Power on the gameboy and connect it to the VFD control panel. Select the setup option from the main menu and click on the quick setup.",
@@ -17,15 +15,6 @@ export default function Setup() {
     "After clicking to acknowledge, everything should be okay.",
     "The VFD is now properly configured for use with the conveyor controller.",
   ];
-
-  // Function to navigate carousel
-  const navigateCarousel = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setCurrentImage((current) => (current === 1 ? totalImages : current - 1));
-    } else {
-      setCurrentImage((current) => (current === totalImages ? 1 : current + 1));
-    }
-  };
 
   // Add this effect to handle smooth scrolling with header offset
   useEffect(() => {
@@ -130,19 +119,11 @@ export default function Setup() {
         up, you can disconnect the gameboy and only use the conveyor controller
         to move the conveyor.
       </p>
-      <div className="card bg-base-100 shadow-lg">
-        <figure className="px-6 pt-6">
-          <img
-            src=""
-            alt="How the proper setup of the VFD with the conveyor controller looks like."
-            className="rounded-lg"
-          />
-        </figure>
-        <div className="card-body text-sm italic">
-          How the proper setup of the VFD with the conveyor controller looks
-          like.
-        </div>
-      </div>
+      <StandardImage
+        src=""
+        alt="How the proper setup of the VFD with the conveyor controller looks like."
+        caption="How the proper setup of the VFD with the conveyor controller looks like."
+      />
       <p className="text-base-content mb-4">
         The conveyor controller can be used locally or remotely. Local mode can
         be used without connecting the device's power cable, but you will be
@@ -152,20 +133,11 @@ export default function Setup() {
         one conveyor using more conveyor controller devices which are connected
         on one network.
       </p>
-      <div className="card bg-base-100 shadow-lg">
-        <figure className="px-6 pt-6">
-          <img
-            src=""
-            alt="Image where you can see what each of the buttons mean on the conveyor controller."
-            className="rounded-lg"
-          />
-        </figure>
-        <div className="card-body text-sm italic">
-          Image showing what each of the buttons mean on the conveyor
-          controller.
-        </div>
-      </div>
-
+      <StandardImage
+        src=""
+        alt="Image where you can see what each of the buttons mean on the conveyor controller."
+        caption="Image showing what each of the buttons mean on the conveyor controller."
+      />
       <h2
         id="vfd"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
@@ -175,82 +147,70 @@ export default function Setup() {
       <p className="text-base-content mb-4">
         Follow these steps to set up the VFD using the gameboy controller:
       </p>
-
-      {/* VFD Setup Image Carousel */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <figure className="px-6 pt-6 relative">
-          <img
-            src={`/images/gbsetup${currentImage}.jpg`}
-            alt={`VFD Setup Step ${currentImage}`}
-            className="rounded-lg"
-          />
-          <div className="absolute inset-0 flex items-center justify-between px-4">
-            <button
-              onClick={() => navigateCarousel("prev")}
-              className="bg-base-300 hover:bg-primary text-primary hover:text-white p-2 rounded-full shadow-lg"
-              aria-label="Previous image"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => navigateCarousel("next")}
-              className="bg-base-300 hover:bg-primary text-primary hover:text-white p-2 rounded-full shadow-lg"
-              aria-label="Next image"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
-        </figure>
-        <div className="card-body text-sm italic">
-          <p>{imageDescriptions[currentImage - 1]}</p>
-          <div className="flex justify-center space-x-1 mt-2">
-            {Array.from({ length: totalImages }).map((_, i) => (
-              <button
-                key={i}
-                className={`h-2 w-2 rounded-full ${
-                  i + 1 === currentImage ? "bg-primary" : "bg-base-300"
-                }`}
-                onClick={() => setCurrentImage(i + 1)}
-                aria-label={`Go to image ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
+      <ImageCarousel
+        images={[
+          "gbsetup1",
+          "gbsetup2",
+          "gbsetup3",
+          "gbsetup4",
+          "gbsetup5",
+          "gbsetup6",
+          "gbsetup7",
+          "gbsetup8",
+          "gbsetup9",
+        ]}
+        descriptions={imageDescriptions}
+      />
       <h2
         id="connections"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
       >
         Where to connect the cables from the conveyor controller
       </h2>
-
+      <div className="alert alert-warning shadow-lg mb-6">
+        <div className="flex space-x-4 items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current flex-shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <span>
+            Alert! Before you connect the cables, make sure the VFD power is
+            off! Make sure the high voltage switch is set to "O".
+          </span>
+        </div>
+      </div>
+      <StandardImage
+        src="images/HVswitch.jpg"
+        alt="The high voltage should be switched to 0 (pointing left)"
+        caption="The high voltage should be switched to point at O - pointing left."
+      />
+      <p className="text-base-content mb-4">
+        The conveyor controller has three cables:
+      </p>
+      <ul className="bg-base-100 p-4 rounded-md shadow-sm mb-8 space-y-2">
+        <li className="flex items-center">
+          <span className="badge badge-primary mr-2">Yellow</span> Connects to
+          the input that has DI0 and DI1 written on it.
+        </li>
+        <li className="flex items-center">
+          <span className="badge badge-primary mr-2">Black</span> Connects to
+          the input that has DI2 and DI3 written on it. It is to the right of
+          the input with the yellow cable.
+        </li>
+        <li className="flex items-center">
+          <span className="badge badge-primary mr-2">Black</span> The cable with
+          the 9-pin head connects to the slot that has 24V OUT written on it.
+        </li>
+      </ul>
       <h2
         id="wifi"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
@@ -275,7 +235,6 @@ export default function Setup() {
           <span className="badge badge-primary mr-2">Password</span> 65362280
         </li>
       </ul>
-
       <h2
         id="starting"
         className="text-2xl font-semibold text-secondary mb-4 mt-8 border-l-4 border-secondary pl-3"
@@ -286,19 +245,11 @@ export default function Setup() {
         Now make sure that the device has all the buttons in the correct
         positions like in the image here:
       </p>
-      <div className="card bg-base-100 shadow-lg">
-        <figure className="px-6 pt-6">
-          <img
-            src="/images/ControlPanelIOSetup.jpg"
-            alt="Control Panel Setup"
-            className="rounded-lg"
-          />
-        </figure>
-        <div className="card-body text-sm italic">
-          Yellow cable connected to the input that has DI0 and DI1 written on it
-          and the black cable connected to the input to the right of it.
-        </div>
-      </div>
+      <StandardImage
+        src="/images/ControlPanelIOSetup.jpg"
+        alt="Control Panel Setup"
+        caption="Yellow cable connected to the input that has DI0 and DI1 written on it and the black cable connected to the input to the right of it."
+      />
     </div>
   );
 }
