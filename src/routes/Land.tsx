@@ -17,7 +17,6 @@ interface ConveyorControl {
   isConveyorOn: boolean;
   isSpeedUpOn: boolean;
   isSpeedDownOn: boolean;
-  // Add new fields for data from API
   speed?: number;
   controlMode?: string;
   isOnline?: boolean;
@@ -29,13 +28,16 @@ export default function Home() {
   const [newName, setNewName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Interval reference for polling conveyor data
   const dataFetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [failedIPs, setFailedIPs] = useState<string[]>([]);
 
+  // Log conveyor state changes for debugging
   useEffect(() => {
     console.log(conveyors);
   }, [conveyors]);
 
+  // Load saved conveyors from localStorage on component mount
   useEffect(() => {
     const savedConveyors = localStorage.getItem("conveyors");
     if (savedConveyors) {
@@ -43,11 +45,12 @@ export default function Home() {
     }
   }, []);
 
+  // Persist conveyor state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("conveyors", JSON.stringify(conveyors));
   }, [conveyors]);
 
-  // Update the addConveyor function to immediately fetch data for the new conveyor
+  // Add a new conveyor to the system and fetch its initial data
   const addConveyor = (e: React.FormEvent) => {
     e.preventDefault();
     if (newIp) {
@@ -64,24 +67,52 @@ export default function Home() {
       setNewIp("");
       setNewName("");
 
-      // Fetch data for the new conveyor after a short delay to allow state update
+      // Fetch initial data for the new conveyor after state update
       setTimeout(() => {
         fetchAllConveyorsData();
       }, 100);
     }
   };
 
+  // Remove a conveyor from the system by ID
   const removeConveyor = (id: string) => {
     setConveyors(conveyors.filter((conv) => conv.id !== id));
   };
 
+  // Custom timeout implementation to abort long-running HTTP requests
+  const fetchWithTimeout = async (
+    fetchPromise: Promise<any>,
+    timeoutMs: number
+  ) => {
+    let timeoutId: NodeJS.Timeout;
+
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Request timed out"));
+      }, timeoutMs);
+    });
+
+    try {
+      // Race between the fetch and timeout - whichever resolves/rejects first wins
+      return await Promise.race([fetchPromise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutId!);
+    }
+  };
+
+  // Send a command to a specific conveyor and update its status
   const sendCommand = async (ip: string, command: string) => {
     try {
       const options: HttpOptions = {
         url: `http://${ip}/${command}`,
       };
-      const response: any = await CapacitorHttp.get(options);
-      setErrorMessage(null); // Clear any previous error message
+
+      const response: any = await fetchWithTimeout(
+        CapacitorHttp.get(options),
+        3000 // Fail fast if conveyor is unresponsive
+      );
+
+      setErrorMessage(null);
       console.log(response);
       try {
         const responseData = await response.json();
@@ -90,13 +121,22 @@ export default function Home() {
     } catch (error: any) {
       console.error("Command failed:", error);
       setErrorMessage(`Command failed for ${ip}: ${error.message}`);
+
+      // Immediately mark the conveyor as offline when a command fails
+      setConveyors((prevConveyors) =>
+        prevConveyors.map((conv) =>
+          conv.ip === ip ? { ...conv, isOnline: false } : conv
+        )
+      );
     }
 
+    // Refresh all conveyor statuses shortly after sending a command
     setTimeout(() => {
       fetchAllConveyorsData();
     }, 500);
   };
 
+  // UI state toggle functions
   const toggleConveyor = (id: string) => {
     setConveyors(
       conveyors.map((conv) =>
@@ -121,7 +161,7 @@ export default function Home() {
     );
   };
 
-  // Fix the fetchConveyorData function to use ip instead of ipAddress
+  // Fetch current data for a single conveyor
   const fetchConveyorData = async (
     conveyor: ConveyorControl
   ): Promise<ConveyorControl> => {
@@ -132,13 +172,16 @@ export default function Home() {
         url: `http://${conveyor.ip}/getData`,
       };
 
-      const response = await CapacitorHttp.get(options);
+      const response = await fetchWithTimeout(
+        CapacitorHttp.get(options),
+        3000 // Quick timeout to detect offline conveyors faster
+      );
 
       if (!response.status || response.status < 200 || response.status >= 300) {
         throw new Error(`Failed to fetch data from ${conveyor.ip}`);
       }
 
-      // Parse the response data
+      // Parse response data, handling both string and object formats
       let data;
       try {
         if (typeof response.data === "string") {
@@ -151,7 +194,7 @@ export default function Home() {
         throw new Error(`Invalid response from ${conveyor.ip}`);
       }
 
-      // Return updated conveyor with data from API
+      // Return conveyor with updated real-time data
       return {
         ...conveyor,
         speed: data.conveyorSpeed,
@@ -160,7 +203,7 @@ export default function Home() {
       };
     } catch (error) {
       console.error(`Error fetching data from ${conveyor.ip}:`, error);
-      // Return conveyor marked as offline
+      // Mark conveyor as offline when requests fail
       return {
         ...conveyor,
         isOnline: false,
@@ -168,26 +211,23 @@ export default function Home() {
     }
   };
 
-  // Fix the fetchAllConveyorsData function to properly handle conveyor state
+  // Fetch current data for all conveyors in parallel
   const fetchAllConveyorsData = async () => {
-    // Skip if no conveyors exist
     if (conveyors.length === 0) return;
 
     const newFailedIPs: string[] = [];
 
-    // Create promises for all conveyors
+    // Create promises for all conveyor data fetches
     const updatedConveyorsPromises = conveyors.map(async (conveyor) => {
       try {
         const updatedConveyor = await fetchConveyorData({ ...conveyor });
 
-        // If offline, add to failed IPs
         if (!updatedConveyor.isOnline) {
           newFailedIPs.push(conveyor.ip);
         }
 
         return updatedConveyor;
       } catch (error) {
-        // If fetch throws, mark as offline and add to failed IPs
         newFailedIPs.push(conveyor.ip);
         return { ...conveyor, isOnline: false };
       }
@@ -196,15 +236,15 @@ export default function Home() {
     // Wait for all fetches to complete
     const updatedConveyors = await Promise.all(updatedConveyorsPromises);
 
-    // Update conveyors state - keep existing ID, name, etc.
+    // Update conveyor state while preserving unrelated properties
     setConveyors((prevConveyors) => {
-      // Create a mapping of existing conveyors by ID
+      // Create a mapping of fetched conveyor data by ID for efficient lookup
       const updatedMap = updatedConveyors.reduce((map, conveyor) => {
         map[conveyor.id] = conveyor;
         return map;
       }, {} as Record<string, ConveyorControl>);
 
-      // Update each conveyor while preserving other properties
+      // Merge new data with existing conveyors
       return prevConveyors.map((conveyor) => {
         if (updatedMap[conveyor.id]) {
           return {
@@ -218,45 +258,44 @@ export default function Home() {
       });
     });
 
-    // Update failed IPs
     setFailedIPs(newFailedIPs);
 
-    // Update error message based on failed IPs
-    if (newFailedIPs.length > 0) {
+    // Update error message based on connection status
+    if (newFailedIPs.length === 0) {
+      // All conveyors are online, clear any error message
+      setErrorMessage(null);
+    } else {
+      // Some conveyors are offline, show error with specific IPs
       setErrorMessage(
         `Failed to connect to the following IP addresses: ${newFailedIPs.join(
           ", "
         )}`
       );
-    } else if (errorMessage && errorMessage.includes("Failed to connect")) {
-      // Clear error if there were previously failures but now all are working
-      setErrorMessage(null);
     }
   };
 
-  // Update the useEffect that sets up fetching to also run when conveyors change
+  // Set up data polling when conveyors are added or removed
   useEffect(() => {
-    // Clear any existing interval
+    // Clean up existing interval
     if (dataFetchIntervalRef.current) {
       clearInterval(dataFetchIntervalRef.current);
     }
 
-    // Skip if no conveyors exist
     if (conveyors.length === 0) return;
 
-    // Fetch immediately
+    // Initial fetch immediately when conveyors change
     fetchAllConveyorsData();
 
-    // Set up a new interval
+    // Poll for data every 2 seconds
     dataFetchIntervalRef.current = setInterval(fetchAllConveyorsData, 2000);
 
-    // Cleanup on unmount or when conveyors change
+    // Clean up on unmount or when conveyors change
     return () => {
       if (dataFetchIntervalRef.current) {
         clearInterval(dataFetchIntervalRef.current);
       }
     };
-  }, [conveyors.length]); // Depend on the number of conveyors
+  }, [conveyors.length]);
 
   return (
     <>
