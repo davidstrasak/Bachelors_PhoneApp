@@ -30,7 +30,6 @@ export default function Home() {
 
   // Interval reference for polling conveyor data
   const dataFetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [failedIPs, setFailedIPs] = useState<string[]>([]);
 
   // Log conveyor state changes for debugging
   useEffect(() => {
@@ -257,8 +256,6 @@ export default function Home() {
         return conveyor;
       });
     });
-
-    setFailedIPs(newFailedIPs);
 
     // Update error message based on connection status
     if (newFailedIPs.length === 0) {
