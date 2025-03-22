@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   PlusCircle,
   Trash2,
@@ -17,54 +17,20 @@ interface ConveyorControl {
   isConveyorOn: boolean;
   isSpeedUpOn: boolean;
   isSpeedDownOn: boolean;
+  // Add new fields for data from API
+  speed?: number;
+  controlMode?: string;
+  isOnline?: boolean;
 }
 
 export default function Home() {
-  const [conveyors, setConveyors] = useState<ConveyorControl[]>([
-    {
-      id: "1",
-      ip: "192.168.0.187",
-      name: "D1 mini board",
-      isConveyorOn: false,
-      isSpeedUpOn: false,
-      isSpeedDownOn: false,
-    },
-    {
-      id: "2",
-      ip: "192.168.1.102",
-      name: "Packaging Line",
-      isConveyorOn: false,
-      isSpeedUpOn: false,
-      isSpeedDownOn: false,
-    },
-    {
-      id: "3",
-      ip: "192.168.1.103",
-      name: "Assembly Line",
-      isConveyorOn: false,
-      isSpeedUpOn: false,
-      isSpeedDownOn: false,
-    },
-    {
-      id: "4",
-      ip: "192.168.1.104",
-      name: "Sorting Line",
-      isConveyorOn: false,
-      isSpeedUpOn: false,
-      isSpeedDownOn: false,
-    },
-    {
-      id: "5",
-      ip: "192.168.1.105",
-      name: "Distribution Line",
-      isConveyorOn: false,
-      isSpeedUpOn: false,
-      isSpeedDownOn: false,
-    },
-  ]);
+  const [conveyors, setConveyors] = useState<ConveyorControl[]>([]);
   const [newIp, setNewIp] = useState("");
   const [newName, setNewName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const dataFetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [failedIPs, setFailedIPs] = useState<string[]>([]);
 
   useEffect(() => {
     console.log(conveyors);
@@ -81,22 +47,27 @@ export default function Home() {
     localStorage.setItem("conveyors", JSON.stringify(conveyors));
   }, [conveyors]);
 
+  // Update the addConveyor function to immediately fetch data for the new conveyor
   const addConveyor = (e: React.FormEvent) => {
     e.preventDefault();
     if (newIp) {
-      setConveyors([
-        ...conveyors,
-        {
-          id: Date.now().toString(),
-          ip: newIp,
-          name: newName || `Conveyor ${conveyors.length + 1}`,
-          isConveyorOn: false,
-          isSpeedUpOn: false,
-          isSpeedDownOn: false,
-        },
-      ]);
+      const newConveyor = {
+        id: Date.now().toString(),
+        ip: newIp,
+        name: newName || `Conveyor ${conveyors.length + 1}`,
+        isConveyorOn: false,
+        isSpeedUpOn: false,
+        isSpeedDownOn: false,
+      };
+
+      setConveyors((prevConveyors) => [...prevConveyors, newConveyor]);
       setNewIp("");
       setNewName("");
+
+      // Fetch data for the new conveyor after a short delay to allow state update
+      setTimeout(() => {
+        fetchAllConveyorsData();
+      }, 100);
     }
   };
 
@@ -110,16 +81,9 @@ export default function Home() {
         url: `http://${ip}/${command}`,
       };
       const response: any = await CapacitorHttp.get(options);
-      // const response = await fetch(`http://${ip}/${command}`);
-      // if (!response.ok) {
-      //   throw new Error(
-      //     `Failed to send command to ${ip}: ${response.status} ${response.statusText}`
-      //   );
-      // }
       setErrorMessage(null); // Clear any previous error message
       console.log(response);
       try {
-        // Try catch block here to catch the errors in JSON parsing (since when testing the app is responding with HTML)
         const responseData = await response.json();
         console.log("Response data:", responseData);
       } catch (error: any) {}
@@ -127,6 +91,10 @@ export default function Home() {
       console.error("Command failed:", error);
       setErrorMessage(`Command failed for ${ip}: ${error.message}`);
     }
+
+    setTimeout(() => {
+      fetchAllConveyorsData();
+    }, 500);
   };
 
   const toggleConveyor = (id: string) => {
@@ -153,18 +121,142 @@ export default function Home() {
     );
   };
 
-  // this code is here to test if the fetch function works
-  useEffect(() => {
-    const fetchData = async () => {
+  // Fix the fetchConveyorData function to use ip instead of ipAddress
+  const fetchConveyorData = async (
+    conveyor: ConveyorControl
+  ): Promise<ConveyorControl> => {
+    if (!conveyor.ip) return conveyor;
+
+    try {
+      const options: HttpOptions = {
+        url: `http://${conveyor.ip}/getData`,
+      };
+
+      const response = await CapacitorHttp.get(options);
+
+      if (!response.status || response.status < 200 || response.status >= 300) {
+        throw new Error(`Failed to fetch data from ${conveyor.ip}`);
+      }
+
+      // Parse the response data
+      let data;
       try {
-        await sendCommand("jsonplaceholder.typicode.com", "todos/1");
+        if (typeof response.data === "string") {
+          data = JSON.parse(response.data);
+        } else {
+          data = response.data;
+        }
+      } catch (e) {
+        console.error("Error parsing response:", e);
+        throw new Error(`Invalid response from ${conveyor.ip}`);
+      }
+
+      // Return updated conveyor with data from API
+      return {
+        ...conveyor,
+        speed: data.conveyorSpeed,
+        controlMode: data.localRemote,
+        isOnline: true,
+      };
+    } catch (error) {
+      console.error(`Error fetching data from ${conveyor.ip}:`, error);
+      // Return conveyor marked as offline
+      return {
+        ...conveyor,
+        isOnline: false,
+      };
+    }
+  };
+
+  // Fix the fetchAllConveyorsData function to properly handle conveyor state
+  const fetchAllConveyorsData = async () => {
+    // Skip if no conveyors exist
+    if (conveyors.length === 0) return;
+
+    const newFailedIPs: string[] = [];
+
+    // Create promises for all conveyors
+    const updatedConveyorsPromises = conveyors.map(async (conveyor) => {
+      try {
+        const updatedConveyor = await fetchConveyorData({ ...conveyor });
+
+        // If offline, add to failed IPs
+        if (!updatedConveyor.isOnline) {
+          newFailedIPs.push(conveyor.ip);
+        }
+
+        return updatedConveyor;
       } catch (error) {
-        console.error("Error fetching data:", error);
+        // If fetch throws, mark as offline and add to failed IPs
+        newFailedIPs.push(conveyor.ip);
+        return { ...conveyor, isOnline: false };
+      }
+    });
+
+    // Wait for all fetches to complete
+    const updatedConveyors = await Promise.all(updatedConveyorsPromises);
+
+    // Update conveyors state - keep existing ID, name, etc.
+    setConveyors((prevConveyors) => {
+      // Create a mapping of existing conveyors by ID
+      const updatedMap = updatedConveyors.reduce((map, conveyor) => {
+        map[conveyor.id] = conveyor;
+        return map;
+      }, {} as Record<string, ConveyorControl>);
+
+      // Update each conveyor while preserving other properties
+      return prevConveyors.map((conveyor) => {
+        if (updatedMap[conveyor.id]) {
+          return {
+            ...conveyor,
+            speed: updatedMap[conveyor.id].speed,
+            controlMode: updatedMap[conveyor.id].controlMode,
+            isOnline: updatedMap[conveyor.id].isOnline,
+          };
+        }
+        return conveyor;
+      });
+    });
+
+    // Update failed IPs
+    setFailedIPs(newFailedIPs);
+
+    // Update error message based on failed IPs
+    if (newFailedIPs.length > 0) {
+      setErrorMessage(
+        `Failed to connect to the following IP addresses: ${newFailedIPs.join(
+          ", "
+        )}`
+      );
+    } else if (errorMessage && errorMessage.includes("Failed to connect")) {
+      // Clear error if there were previously failures but now all are working
+      setErrorMessage(null);
+    }
+  };
+
+  // Update the useEffect that sets up fetching to also run when conveyors change
+  useEffect(() => {
+    // Clear any existing interval
+    if (dataFetchIntervalRef.current) {
+      clearInterval(dataFetchIntervalRef.current);
+    }
+
+    // Skip if no conveyors exist
+    if (conveyors.length === 0) return;
+
+    // Fetch immediately
+    fetchAllConveyorsData();
+
+    // Set up a new interval
+    dataFetchIntervalRef.current = setInterval(fetchAllConveyorsData, 2000);
+
+    // Cleanup on unmount or when conveyors change
+    return () => {
+      if (dataFetchIntervalRef.current) {
+        clearInterval(dataFetchIntervalRef.current);
       }
     };
-
-    fetchData();
-  }, []);
+  }, [conveyors.length]); // Depend on the number of conveyors
 
   return (
     <>
@@ -218,7 +310,11 @@ export default function Home() {
         {conveyors.map((conveyor) => (
           <div
             key={conveyor.id}
-            className="border-2 rounded-lg p-4 border-base-content"
+            className={`border-2 rounded-lg p-4 ${
+              conveyor.isOnline === false
+                ? "border-error opacity-60"
+                : "border-base-content"
+            }`}
           >
             <div className="">
               <div className="flex justify-between items-center mb-4">
@@ -239,11 +335,23 @@ export default function Home() {
                     }}
                   />
 
-                  <p className="text-sm text-muted-foreground">{conveyor.ip}</p>
-
-                  <p className="text-sm text-muted-foreground">Speed: 50%</p>
                   <p className="text-sm text-muted-foreground">
-                    Remote Controlled
+                    {conveyor.ip}
+                    {conveyor.isOnline === false && (
+                      <span className="badge badge-error badge-sm ml-2">
+                        Offline
+                      </span>
+                    )}
+                  </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Speed:{" "}
+                    {conveyor.speed !== undefined
+                      ? `${conveyor.speed}%`
+                      : "Unknown"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {conveyor.controlMode || "Unknown"} Control
                   </p>
                 </div>
                 <button
@@ -265,6 +373,7 @@ export default function Home() {
                     );
                     toggleConveyor(conveyor.id);
                   }}
+                  disabled={conveyor.isOnline === false}
                 >
                   <Power className="w-4 h-4 mr-2" />
                   {conveyor.isConveyorOn ? "ON" : "OFF"}
@@ -282,9 +391,10 @@ export default function Home() {
                     );
                     toggleSpeedUp(conveyor.id);
                   }}
+                  disabled={conveyor.isOnline === false}
                 >
                   <ChevronUp className="w-4 h-4 mr-2" />
-                  {conveyor.isSpeedUpOn ? "Speed +" : "Speed +"}
+                  Speed +
                 </button>
                 <button
                   className={`w-full btn ${
@@ -299,9 +409,10 @@ export default function Home() {
                     );
                     toggleSpeedDown(conveyor.id);
                   }}
+                  disabled={conveyor.isOnline === false}
                 >
                   <ChevronDown className="w-4 h-4 mr-2" />
-                  {conveyor.isSpeedDownOn ? "Speed -" : "Speed -"}
+                  Speed -
                 </button>
               </div>
             </div>
