@@ -13,7 +13,7 @@
     "@capacitor/android": "^7.0.1",
     "@capacitor/cli": "^7.0.1",
     "@capacitor/core": "^7.0.1",
-    "@capacitor/ios": "^7.0.1",
+    "@capacitor/ios": "^7.4.1",
     "@capacitor/network": "^7.0.0",
     "@tailwindcss/vite": "^4.0.8",
     "@types/react-router-dom": "^5.3.3",

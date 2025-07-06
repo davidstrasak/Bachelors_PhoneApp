@@ -257,10 +257,11 @@ export default function Setup() {
       </p>
       <ul className="bg-base-100 p-4 rounded-md shadow-sm mb-8 space-y-2">
         <li className="flex items-center">
-          <span className="badge badge-primary mr-2">SSID</span> TP-Link_83CA
+          <span className="badge badge-primary mr-2">SSID</span> CC
         </li>
         <li className="flex items-center">
-          <span className="badge badge-primary mr-2">Password</span> 65362280
+          <span className="badge badge-primary mr-2">Password</span>{" "}
+          ConveyorController352644
         </li>
       </ul>
       <h2
